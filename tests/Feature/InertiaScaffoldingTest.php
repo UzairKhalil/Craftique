@@ -18,27 +18,27 @@ final class InertiaScaffoldingTest extends TestCase
     {
         $this->get('/login')
             ->assertOk()
-            ->assertInertia(fn (AssertableInertia $page) => $page->component('Auth/Login'));
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->component('Auth/Login'));
     }
 
     public function test_the_register_page_is_rendered_through_inertia(): void
     {
         $this->get('/register')
             ->assertOk()
-            ->assertInertia(fn (AssertableInertia $page) => $page->component('Auth/Register'));
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->component('Auth/Register'));
     }
 
     public function test_the_welcome_page_is_rendered_through_inertia(): void
     {
         $this->get('/')
             ->assertOk()
-            ->assertInertia(fn (AssertableInertia $page) => $page->component('Welcome'));
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->component('Welcome'));
     }
 
     public function test_shared_props_expose_the_authenticated_user(): void
     {
         $this->get('/login')->assertInertia(
-            fn (AssertableInertia $page) => $page->where('auth.user', null),
+            fn (AssertableInertia $page): AssertableInertia => $page->where('auth.user', null),
         );
     }
 }

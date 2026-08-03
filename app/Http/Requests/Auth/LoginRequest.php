@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Auth\Events\Lockout;
@@ -81,6 +83,8 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+        // string() returns a Stringable, which Str::lower() does not accept.
+        // Under declare(strict_types=1) that stops being a silent coercion.
+        return Str::transliterate($this->string('email')->lower().'|'.$this->ip());
     }
 }

@@ -233,7 +233,7 @@ final class DoctorCommand extends Command
                 'Cache & Queue',
                 'redis server',
                 self::STATUS_PASS,
-                (string) config('database.redis.default.host').':'.config('database.redis.default.port'),
+                config('database.redis.default.host').':'.config('database.redis.default.port'),
             );
         } catch (Throwable $e) {
             $this->record(
@@ -312,7 +312,7 @@ final class DoctorCommand extends Command
 
     private function record(string $group, string $check, string $status, string $detail): void
     {
-        $this->results[] = compact('group', 'check', 'status', 'detail');
+        $this->results[] = ['group' => $group, 'check' => $check, 'status' => $status, 'detail' => $detail];
     }
 
     private function renderTable(): int

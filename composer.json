@@ -17,6 +17,7 @@
     "tightenco/ziggy": "^2.0"
   },
   "require-dev": {
+    "driftingly/rector-laravel": "^2.5",
     "fakerphp/faker": "^1.23",
     "larastan/larastan": "^3.10",
     "laravel/breeze": "^2.4",
@@ -27,7 +28,8 @@
     "nunomaduro/collision": "^8.6",
     "pestphp/pest": "^3.8",
     "pestphp/pest-plugin-laravel": "^3.2",
-    "phpunit/phpunit": "^11.5.50"
+    "phpunit/phpunit": "^11.5.50",
+    "rector/rector": "^2.6"
   },
   "autoload": {
     "psr-4": {
