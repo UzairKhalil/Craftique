@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php -i)",
+      "Bash(cp /c/Users/Lenovo/AppData/Local/Temp/claude/C--xampp-htdocs-Laravel-Craftique/7416bb2a-d223-462f-a360-222ac0b59c93/scratchpad/phpredis/php_redis.dll /c/xampp/php/ext/php_redis.dll)",
+      "Bash(sed -i 's/^;extension=intl$/extension=intl/; s/^;extension=sodium$/extension=sodium/' /c/xampp/php/php.ini)",
+      "Bash(sed -i 's/^extension=sodium$/extension=sodium\\\\nextension=redis/' /c/xampp/php/php.ini)",
+      "Bash(grep -nE \"^extension=\\(intl|sodium|redis\\)$\" /c/xampp/php/php.ini)",
+      "Bash(echo \"EXIT CODE: $?\")",
+      "Bash(vendor/bin/pint --test app/Console/Commands/DoctorCommand.php tests/Feature/Console/DoctorCommandTest.php)"
+    ]
+  }
+}

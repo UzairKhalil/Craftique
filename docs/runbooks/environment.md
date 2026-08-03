@@ -14,6 +14,72 @@ SQLite and MariaDB are unsupported.
 
 MySQL 8's X protocol is disabled (`mysqlx = OFF`) so nothing contends on 33060.
 
+## PHP requirements
+
+**PHP 8.2 minimum** (Laravel 12's floor). **8.3 or 8.4 recommended** — see ADR-0010. The current
+machine runs 8.2.12 from XAMPP, which the doctor reports as a warning, not an error.
+
+### Required extensions
+
+Missing any of these is a hard failure:
+
+| Extension | Needed for |
+|---|---|
+| `pdo_mysql` | Database access |
+| `mbstring`, `xml`, `ctype`, `json`, `tokenizer` | Framework internals |
+| `openssl` | Encryption, TLS |
+| `curl` | Payment and carrier APIs |
+| `fileinfo` | Upload MIME sniffing (never trust the extension) |
+| `bcmath` | Money arithmetic (ADR-0004) |
+| `intl` | Money and date formatting |
+| `zip` | Imports, exports, backups |
+| `exif` | Image orientation on upload |
+| `redis` | Cache, queue, locks, broadcasting |
+| `gd` **or** `imagick` | Image conversions (MediaLibrary) |
+
+Recommended but optional: `imagick` (better conversion quality than gd), `sodium`, `opcache`.
+
+### Enabling them on XAMPP
+
+XAMPP ships `php_intl.dll` and `php_sodium.dll` but leaves them commented out in
+`C:\xampp\php\php.ini`. Uncomment:
+
+```ini
+extension=intl
+extension=sodium
+```
+
+`phpredis` is **not** bundled with XAMPP. Download the build matching this PHP — 8.2, **Thread Safe
+(TS)**, VS16, x64; check `php -i | findstr "Thread Safety"` before choosing — from
+<https://downloads.php.net/~windows/pecl/releases/redis/>, drop `php_redis.dll` into
+`C:\xampp\php\ext\`, then add:
+
+```ini
+extension=redis
+```
+
+Restart Apache afterwards if you serve through XAMPP. A timestamped backup of the original file is
+kept at `C:\xampp\php\php.ini.bak-<timestamp>`.
+
+## Checking the environment is ready
+
+```bash
+php artisan craftique:doctor          # human-readable table
+php artisan craftique:doctor --json   # machine-readable, for CI
+```
+
+It verifies the PHP version, every required extension, database connectivity (and that the server is
+MySQL 8 rather than MariaDB, with the expected collation), the test database, Redis, directory
+permissions, and `APP_KEY`. **Exit code is non-zero if any check fails**, so CI can gate on it.
+
+Expected warnings on this machine until the relevant task lands:
+
+| Warning | Resolved by |
+|---|---|
+| `version 8.2.12 — 8.3+ recommended` | ADR-0010, optional |
+| `redis server unreachable` | T-M0-003 (Redis server install) |
+| `opcache not loaded` | Production concern only; CLI does not load it |
+
 ## Starting and stopping MySQL 8
 
 MySQL 8 is **not** registered as a Windows service — that requires administrator rights. Start it
