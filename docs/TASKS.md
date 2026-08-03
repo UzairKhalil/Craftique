@@ -57,7 +57,7 @@ These were unanswered when implementation was approved. Each is implemented as *
 
 | Milestone | Focus | Tasks | Done |
 |---|---|---|---|
-| M0 | Foundation & tooling | 15 | 5 |
+| M0 | Foundation & tooling | 15 | 6 |
 | M1 | Design system & app shell | 24 | 0 |
 | M2 | Identity & accounts | 22 | 0 |
 | M3 | Vendor onboarding | 22 | 0 |
@@ -75,7 +75,7 @@ These were unanswered when implementation was approved. Each is implemented as *
 | M15 | Admin & platform operations | 28 | 0 |
 | M16 | Promotions & growth | 22 | 0 |
 | M17 | Hardening & launch | 20 | 0 |
-| | **Total** | **434** | **5** |
+| | **Total** | **434** | **6** |
 
 ---
 
@@ -91,7 +91,7 @@ These were unanswered when implementation was approved. Each is implemented as *
 | [x] T-M0-002 | Verify PHP extensions (`pdo_mysql`, `gd`/`imagick`, `redis`, `intl`, `zip`, `bcmath`); document required versions in `docs/runbooks/environment.md` | — | ✅ `craftique:doctor` added (table + `--json`, non-zero exit on failure), 6 tests / 171 assertions. Enabled `intl` + `sodium`, installed `phpredis` 6.2.0 (TS/VS16/x64) — all 14 required extensions now PASS. Requirements documented in [environment.md](runbooks/environment.md) |
 | [x] T-M0-003 | Install Redis; point `CACHE_STORE`, `SESSION_DRIVER`, `QUEUE_CONNECTION`, `BROADCAST_CONNECTION` at it with a documented database-driver fallback | T-M0-001 | ✅ Redis 5.0.14 at `C:\redis` (portable, no admin). All 4 drivers on Redis. Verified end to end: dispatch → Redis db 0 → worker → cache write db 1 → `Cache::get`. Doctor now does a real cache round-trip and **fails** (not warns) when a driver depends on an unreachable Redis. Fallback documented in [environment.md](runbooks/environment.md); scripts `scripts/redis.{sh,bat}` |
 | [x] T-M0-004 | Install Breeze (Inertia + React + TypeScript + SSR); confirm Vite build and SSR entry | — | ✅ `breeze:install react --typescript --ssr --dark`. Breeze ships **Tailwind 3 + React 18**, so its `npm install` failed against our Tailwind 4 and was corrected per ADR-001/§9.5: now React **19.2.8**, Tailwind **4.3.3** (`@tailwindcss/vite`, no postcss/autoprefixer/`tailwind.config.js`), Inertia **2.3.27**, TS 5.9.3. Client + SSR bundles build, SSR server boots on 13714, 39 tests / 295 assertions green |
-| [ ] T-M0-005 | Configure TypeScript `strict: true`, path aliases (`@/`), and `resources/js/types/` | T-M0-004 | `npx tsc --noEmit` clean |
+| [x] T-M0-005 | Configure TypeScript `strict: true`, path aliases (`@/`), and `resources/js/types/` | T-M0-004 | ✅ `strict` plus `noUncheckedIndexedAccess`, `noImplicitOverride`, `noFallthroughCasesInSwitch`, `noUnusedLocals/Parameters`, `allowUnreachableCode: false`. `@/*` alias, `types/generated.d.ts` placeholder per §9.5. `npx tsc --noEmit` clean, build green |
 | [ ] T-M0-006 | Add ESLint (+ `jsx-a11y`, `react-hooks`) and Prettier with the Tailwind class-sorting plugin; npm scripts `lint`, `lint:fix`, `format` | T-M0-004 | `npm run lint` clean on the scaffold |
 | [ ] T-M0-007 | Install Pest, convert the default tests, add `tests/Unit`, `tests/Feature`, `tests/Architecture` structure | — | `composer test` green |
 | [ ] T-M0-008 | Install Larastan at level 6 with `phpstan.neon`; fix scaffold findings | T-M0-007 | `vendor/bin/phpstan analyse` clean |
