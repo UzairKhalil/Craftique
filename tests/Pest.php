@@ -28,17 +28,12 @@ pest()->extend(TestCase::class)->in('Architecture');
 | Expectations
 |--------------------------------------------------------------------------
 |
-| Domain-specific expectations live here so assertions read as the business
+| Domain-specific expectations belong here so assertions read as the business
 | rule they enforce rather than as plumbing.
 |
+| None are registered yet. Custom expectations are bound at runtime and are
+| therefore invisible to static analysis, so they earn their keep only once
+| there is a domain type to assert against — `toBeMinorUnits` arrives with the
+| Money value object in T-M5-001, typed so PHPStan can still see it.
+|
 */
-
-/**
- * Money is stored in integer minor units (ADR-0004). Floats must never appear
- * in a monetary value, so assert the type as well as the amount.
- */
-expect()->extend('toBeMinorUnits', function (int $expected) {
-    expect($this->value)->toBeInt()->toBe($expected);
-
-    return $this;
-});

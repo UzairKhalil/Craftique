@@ -20,7 +20,8 @@ class UserFactory extends Factory
     /**
      * Define the model's default state.
      *
-     * @return array<string, mixed>
+     * The return type is inherited from Factory so Larastan can tie the keys to
+     * the model's real properties; redeclaring it here loses that.
      */
     public function definition(): array
     {

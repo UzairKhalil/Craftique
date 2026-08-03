@@ -1,0 +1,24 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 6
+
+    paths:
+        - app
+        - config
+        - database
+        - routes
+        - tests
+
+    tmpDir: storage/framework/cache/phpstan
+
+    # Larastan understands Eloquent's magic; these make it strict about the
+    # places where that magic usually hides real bugs.
+    checkModelProperties: true
+    checkOctaneCompatibility: true
+
+    # PROJECT_PLAN §8.4: never silently swallow a failure.
+    treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: true
+

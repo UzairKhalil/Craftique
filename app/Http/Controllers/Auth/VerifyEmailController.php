@@ -14,12 +14,17 @@ class VerifyEmailController extends Controller
      */
     public function __invoke(EmailVerificationRequest $request): RedirectResponse
     {
-        if ($request->user()->hasVerifiedEmail()) {
+        // EmailVerificationRequest authorises before this runs, so a user is
+        // always present — but resolving it once keeps that guarantee explicit
+        // rather than relying on three separate nullable calls.
+        $user = $request->user();
+
+        if ($user === null || $user->hasVerifiedEmail()) {
             return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
         }
 
-        if ($request->user()->markEmailAsVerified()) {
-            event(new Verified($request->user()));
+        if ($user->markEmailAsVerified()) {
+            event(new Verified($user));
         }
 
         return redirect()->intended(route('dashboard', absolute: false).'?verified=1');

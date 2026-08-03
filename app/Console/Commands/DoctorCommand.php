@@ -34,9 +34,6 @@ final class DoctorCommand extends Command
 
     private const STATUS_FAIL = 'FAIL';
 
-    /** Minimum PHP version Laravel 12 and this codebase require. */
-    private const PHP_MINIMUM = 80200;
-
     /** Preferred PHP version (ADR-0010) — below this we warn but continue. */
     private const PHP_RECOMMENDED = 80300;
 
@@ -100,12 +97,9 @@ final class DoctorCommand extends Command
     {
         $version = PHP_VERSION;
 
-        if (PHP_VERSION_ID < self::PHP_MINIMUM) {
-            $this->record('PHP', 'version', self::STATUS_FAIL, "{$version} — 8.2 or newer required");
-
-            return;
-        }
-
+        // The 8.2 floor is enforced by composer.json's platform requirement, so
+        // the application cannot install — let alone run — below it. Only the
+        // recommended version is worth reporting here.
         if (PHP_VERSION_ID < self::PHP_RECOMMENDED) {
             $this->record('PHP', 'version', self::STATUS_WARN, "{$version} — 8.3+ recommended (ADR-0010)");
 
@@ -187,7 +181,9 @@ final class DoctorCommand extends Command
 
     private function checkTestDatabaseExists(): void
     {
-        $testDatabase = (string) (env('DB_TEST_DATABASE') ?? config('database.connections.mysql.database').'_test');
+        // Derived from config, not env(): env() returns null once the config
+        // is cached, which is exactly when a doctor run matters most.
+        $testDatabase = config('database.connections.mysql.database').'_test';
 
         try {
             $exists = DB::selectOne(
