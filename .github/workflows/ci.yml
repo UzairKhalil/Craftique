@@ -1,0 +1,144 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # ADR-0009: MySQL 8 in every environment, including CI. The service below is
+  # MySQL 8.4 so schema behaviour matches development and production exactly.
+  DB_CONNECTION: mysql
+  DB_HOST: 127.0.0.1
+  DB_PORT: 3306
+  DB_DATABASE: craftique_test
+  DB_USERNAME: root
+  DB_PASSWORD: root
+  DB_CHARSET: utf8mb4
+  DB_COLLATION: utf8mb4_0900_ai_ci
+  REDIS_HOST: 127.0.0.1
+  REDIS_PORT: 6379
+
+jobs:
+  quality:
+    name: PHP quality
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: craftique_test
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_mysql, mbstring, openssl, curl, fileinfo, tokenizer, xml, ctype, bcmath, intl, zip, exif, redis, gd
+          coverage: none
+          tools: composer:v2
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Verify the environment is sane
+        run: php artisan craftique:doctor
+
+      - name: Check formatting (Pint)
+        run: vendor/bin/pint --test
+
+      - name: Static analysis (PHPStan)
+        run: vendor/bin/phpstan analyse --memory-limit=1G --no-progress
+
+      - name: Check for refactoring drift (Rector)
+        run: vendor/bin/rector process --dry-run --no-progress-bar
+
+      - name: Run migrations
+        run: php artisan migrate --force
+
+      - name: Run tests
+        run: php artisan test
+
+      - name: Audit PHP dependencies
+        run: composer audit --no-interaction
+
+  frontend:
+    name: Frontend quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+          tools: composer:v2
+
+      - name: Install PHP dependencies
+        # tsconfig.json aliases `ziggy-js` into vendor/, so the type check needs
+        # Composer's runtime packages even though this job is frontend-only.
+        run: composer install --prefer-dist --no-interaction --no-progress --no-dev
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run types
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Build client and SSR bundles
+        run: npm run build
+
+      - name: Audit Node dependencies
+        # Advisories in dev-only tooling should not block a merge; production
+        # dependencies must be clean.
+        run: npm audit --omit=dev --audit-level=high
