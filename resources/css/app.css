@@ -1,9 +1,15 @@
 @import 'tailwindcss';
 
+@plugin '@tailwindcss/forms';
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
-@source '../**/*.js';
+@source '../**/*.{js,jsx,ts,tsx}';
+
+/* Dark mode is driven by an explicit class so an in-app toggle can override the
+   OS preference in both directions. The toggle itself is built in T-M1-003. */
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
