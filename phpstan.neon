@@ -13,6 +13,13 @@ parameters:
 
     tmpDir: storage/framework/cache/phpstan
 
+    excludePaths:
+        analyseAndScan:
+            # Pest's arch() chain is a runtime-built fluent DSL, not resolvable
+            # statically. The file is declarative rules, not logic, and Pest
+            # itself validates it on every run.
+            - tests/Architecture/ConventionsTest.php
+
     # Larastan understands Eloquent's magic; these make it strict about the
     # places where that magic usually hides real bugs.
     checkModelProperties: true
