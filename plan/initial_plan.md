@@ -8,7 +8,8 @@ Your first responsibility is to deeply analyze this project, design the complete
 
 This project must be built with production quality architecture and code standards.
 
---------------------------------------------------
+---
+
 PROJECT OVERVIEW
 --------------------------------------------------
 
@@ -47,7 +48,8 @@ The system must focus on:
 • scalability
 • high performance
 
---------------------------------------------------
+---
+
 TECH STACK
 --------------------------------------------------
 
@@ -72,8 +74,8 @@ Frontend
 UI
 
 - Tailwind CSS
-OR
-Bootstrap (recommend whichever is better)
+  OR
+  Bootstrap (recommend whichever is better)
 
 Animations
 
@@ -134,7 +136,8 @@ Cloudflare R2
 
 Local
 
---------------------------------------------------
+---
+
 IMPORTANT
 --------------------------------------------------
 
@@ -142,7 +145,8 @@ DO NOT start coding.
 
 FIRST create documentation.
 
---------------------------------------------------
+---
+
 STEP 1
 --------------------------------------------------
 
@@ -252,7 +256,8 @@ Every form.
 
 Break project into many milestones.
 
---------------------------------------------------
+---
+
 FEATURES
 --------------------------------------------------
 
@@ -352,7 +357,8 @@ Coupons
 
 Gift Cards
 
---------------------------------------------------
+---
+
 CUSTOM PRODUCTS
 --------------------------------------------------
 
@@ -388,7 +394,8 @@ Vendor can request clarification
 
 Vendor can send quotation
 
---------------------------------------------------
+---
+
 CHAT
 --------------------------------------------------
 
@@ -432,7 +439,8 @@ Video calls
 
 AI Assistant
 
---------------------------------------------------
+---
+
 ORDER MANAGEMENT
 --------------------------------------------------
 
@@ -464,7 +472,8 @@ Packing Slips
 
 Order Timeline
 
---------------------------------------------------
+---
+
 CUSTOMER
 --------------------------------------------------
 
@@ -490,7 +499,8 @@ Referral Program
 
 Loyalty Points
 
---------------------------------------------------
+---
+
 VENDOR
 --------------------------------------------------
 
@@ -520,13 +530,15 @@ Payouts
 
 Reports
 
---------------------------------------------------
+---
+
 ADMIN
 --------------------------------------------------
 
 Everything manageable.
 
---------------------------------------------------
+---
+
 UI / UX
 --------------------------------------------------
 
@@ -550,7 +562,8 @@ Accessible.
 
 Animation should be subtle.
 
---------------------------------------------------
+---
+
 STEP 2
 --------------------------------------------------
 
@@ -562,7 +575,8 @@ Wait for my approval.
 
 DO NOT start coding.
 
---------------------------------------------------
+---
+
 STEP 3
 --------------------------------------------------
 
@@ -578,7 +592,8 @@ Each task should be independently testable.
 
 Each task should be completable in one session.
 
---------------------------------------------------
+---
+
 STEP 4
 --------------------------------------------------
 
@@ -608,7 +623,8 @@ Wait for approval.
 
 Never jump ahead.
 
---------------------------------------------------
+---
+
 RULES
 --------------------------------------------------
 

@@ -5,7 +5,7 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { type FormEventHandler } from 'react';
 
 export default function Login({
     status,
@@ -32,11 +32,7 @@ export default function Login({
         <GuestLayout>
             <Head title="Log in" />
 
-            {status && (
-                <div className="mb-4 text-sm font-medium text-green-600">
-                    {status}
-                </div>
-            )}
+            {status && <div className="mb-4 text-sm font-medium text-green-600">{status}</div>}
 
             <form onSubmit={submit}>
                 <div>
@@ -73,15 +69,13 @@ export default function Login({
                 </div>
 
                 <div className="mt-4 block">
+                    {/* eslint-disable-next-line jsx-a11y/label-has-associated-control -- the control is nested inside the label, which the rule cannot see through the Checkbox component */}
                     <label className="flex items-center">
                         <Checkbox
                             name="remember"
                             checked={data.remember}
                             onChange={(e) =>
-                                setData(
-                                    'remember',
-                                    (e.target.checked || false) as false,
-                                )
+                                setData('remember', (e.target.checked || false) as false)
                             }
                         />
                         <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
@@ -94,7 +88,7 @@ export default function Login({
                     {canResetPassword && (
                         <Link
                             href={route('password.request')}
-                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
+                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
                         >
                             Forgot your password?
                         </Link>

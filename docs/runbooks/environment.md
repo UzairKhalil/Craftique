@@ -5,12 +5,12 @@ SQLite and MariaDB are unsupported.
 
 ## Services and ports
 
-| Service | Port | Where | Notes |
-|---|---|---|---|
-| **MySQL 8.4.10** (Craftique) | **3307** | `C:\mysql8` | ZIP install, no Windows service, no admin rights |
-| MariaDB 10.4 (XAMPP) | 3306 | `C:\xampp\mysql` | **Not used by Craftique.** Left running for other projects on this machine |
-| Apache / PHP 8.2 (XAMPP) | 80 | `C:\xampp` | Or use `php artisan serve` on 8000 |
-| **Redis 5.0.14** | **6379** | `C:\redis` | Cache, session, queue, locks, broadcasting |
+| Service                      | Port     | Where            | Notes                                                                      |
+| ---------------------------- | -------- | ---------------- | -------------------------------------------------------------------------- |
+| **MySQL 8.4.10** (Craftique) | **3307** | `C:\mysql8`      | ZIP install, no Windows service, no admin rights                           |
+| MariaDB 10.4 (XAMPP)         | 3306     | `C:\xampp\mysql` | **Not used by Craftique.** Left running for other projects on this machine |
+| Apache / PHP 8.2 (XAMPP)     | 80       | `C:\xampp`       | Or use `php artisan serve` on 8000                                         |
+| **Redis 5.0.14**             | **6379** | `C:\redis`       | Cache, session, queue, locks, broadcasting                                 |
 
 MySQL 8's X protocol is disabled (`mysqlx = OFF`) so nothing contends on 33060.
 
@@ -23,19 +23,19 @@ machine runs 8.2.12 from XAMPP, which the doctor reports as a warning, not an er
 
 Missing any of these is a hard failure:
 
-| Extension | Needed for |
-|---|---|
-| `pdo_mysql` | Database access |
-| `mbstring`, `xml`, `ctype`, `json`, `tokenizer` | Framework internals |
-| `openssl` | Encryption, TLS |
-| `curl` | Payment and carrier APIs |
-| `fileinfo` | Upload MIME sniffing (never trust the extension) |
-| `bcmath` | Money arithmetic (ADR-0004) |
-| `intl` | Money and date formatting |
-| `zip` | Imports, exports, backups |
-| `exif` | Image orientation on upload |
-| `redis` | Cache, queue, locks, broadcasting |
-| `gd` **or** `imagick` | Image conversions (MediaLibrary) |
+| Extension                                       | Needed for                                       |
+| ----------------------------------------------- | ------------------------------------------------ |
+| `pdo_mysql`                                     | Database access                                  |
+| `mbstring`, `xml`, `ctype`, `json`, `tokenizer` | Framework internals                              |
+| `openssl`                                       | Encryption, TLS                                  |
+| `curl`                                          | Payment and carrier APIs                         |
+| `fileinfo`                                      | Upload MIME sniffing (never trust the extension) |
+| `bcmath`                                        | Money arithmetic (ADR-0004)                      |
+| `intl`                                          | Money and date formatting                        |
+| `zip`                                           | Imports, exports, backups                        |
+| `exif`                                          | Image orientation on upload                      |
+| `redis`                                         | Cache, queue, locks, broadcasting                |
+| `gd` **or** `imagick`                           | Image conversions (MediaLibrary)                 |
 
 Recommended but optional: `imagick` (better conversion quality than gd), `sodium`, `opcache`.
 
@@ -74,10 +74,10 @@ permissions, and `APP_KEY`. **Exit code is non-zero if any check fails**, so CI 
 
 Expected warnings on this machine until the relevant task lands:
 
-| Warning | Resolved by |
-|---|---|
-| `version 8.2.12 — 8.3+ recommended` | ADR-0010, optional |
-| `opcache not loaded` | Production concern only; CLI does not load it |
+| Warning                             | Resolved by                                   |
+| ----------------------------------- | --------------------------------------------- |
+| `version 8.2.12 — 8.3+ recommended` | ADR-0010, optional                            |
+| `opcache not loaded`                | Production concern only; CLI does not load it |
 
 Redis is reported as a **failure** when `CACHE_STORE`, `QUEUE_CONNECTION`, `SESSION_DRIVER` or
 `BROADCAST_CONNECTION` points at it, and only as a warning otherwise — so a machine that silently
@@ -187,9 +187,9 @@ failure once nothing depends on it.
 
 ## Databases
 
-| Database | Purpose | Collation |
-|---|---|---|
-| `craftique` | Development | `utf8mb4_0900_ai_ci` |
+| Database         | Purpose                    | Collation            |
+| ---------------- | -------------------------- | -------------------- |
+| `craftique`      | Development                | `utf8mb4_0900_ai_ci` |
 | `craftique_test` | Test suite (`phpunit.xml`) | `utf8mb4_0900_ai_ci` |
 
 Credentials for local development are `root` with **no password**, matching the XAMPP convention.
@@ -219,13 +219,13 @@ php artisan test
 
 ## Troubleshooting
 
-| Symptom | Cause | Fix |
-|---|---|---|
-| `SQLSTATE[HY000] [2002]` connection refused | MySQL 8 not running | `scripts/mysql8.sh start` |
+| Symptom                                            | Cause                      | Fix                                                             |
+| -------------------------------------------------- | -------------------------- | --------------------------------------------------------------- |
+| `SQLSTATE[HY000] [2002]` connection refused        | MySQL 8 not running        | `scripts/mysql8.sh start`                                       |
 | Connects but tables are missing / schema looks old | Pointed at MariaDB on 3306 | Check `DB_PORT=3307` in `.env`, then `php artisan config:clear` |
-| `Unknown collation: 'utf8mb4_0900_ai_ci'` | Connected to MariaDB | Same as above — MariaDB has no such collation |
-| Config changes ignored | Cached config | `php artisan config:clear` |
-| Port 3307 already in use | Stale `mysqld.exe` | `scripts/mysql8.sh stop`, or end the process in Task Manager |
+| `Unknown collation: 'utf8mb4_0900_ai_ci'`          | Connected to MariaDB       | Same as above — MariaDB has no such collation                   |
+| Config changes ignored                             | Cached config              | `php artisan config:clear`                                      |
+| Port 3307 already in use                           | Stale `mysqld.exe`         | `scripts/mysql8.sh stop`, or end the process in Task Manager    |
 
 ## Removing the MySQL 8 install
 

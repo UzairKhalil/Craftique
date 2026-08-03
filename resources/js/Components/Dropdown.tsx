@@ -1,10 +1,10 @@
 import { Transition } from '@headlessui/react';
-import { InertiaLinkProps, Link } from '@inertiajs/react';
+import { type InertiaLinkProps, Link } from '@inertiajs/react';
 import {
     createContext,
-    Dispatch,
-    PropsWithChildren,
-    SetStateAction,
+    type Dispatch,
+    type PropsWithChildren,
+    type SetStateAction,
     useContext,
     useState,
 } from 'react';
@@ -38,13 +38,18 @@ const Trigger = ({ children }: PropsWithChildren) => {
 
     return (
         <>
-            <div onClick={toggleOpen}>{children}</div>
+            <button type="button" onClick={toggleOpen} aria-expanded={open}>
+                {children}
+            </button>
 
             {open && (
-                <div
-                    className="fixed inset-0 z-40"
+                <button
+                    type="button"
+                    aria-label="Close menu"
+                    tabIndex={-1}
+                    className="fixed inset-0 z-40 cursor-default"
                     onClick={() => setOpen(false)}
-                ></div>
+                ></button>
             )}
         </>
     );
@@ -87,15 +92,16 @@ const Content = ({
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
             >
+                {/* Closing on click is a convenience for pointer users; keyboard
+                    users close with Escape or by tabbing out, handled by the
+                    trigger. This wrapper is presentational. */}
+                {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
                 <div
                     className={`absolute z-50 mt-2 rounded-md shadow-lg ${alignmentClasses} ${widthClasses}`}
                     onClick={() => setOpen(false)}
                 >
                     <div
-                        className={
-                            `rounded-md ring-1 ring-black ring-opacity-5 ` +
-                            contentClasses
-                        }
+                        className={`ring-opacity-5 rounded-md ring-1 ring-black ` + contentClasses}
                     >
                         {children}
                     </div>
@@ -105,11 +111,7 @@ const Content = ({
     );
 };
 
-const DropdownLink = ({
-    className = '',
-    children,
-    ...props
-}: InertiaLinkProps) => {
+const DropdownLink = ({ className = '', children, ...props }: InertiaLinkProps) => {
     return (
         <Link
             {...props}

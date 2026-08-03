@@ -1,0 +1,10 @@
+public/
+bootstrap/ssr/
+vendor/
+node_modules/
+storage/
+package-lock.json
+composer.lock
+resources/js/types/generated.d.ts
+*.min.js
+*.min.css

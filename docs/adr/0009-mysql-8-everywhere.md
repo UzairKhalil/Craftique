@@ -23,14 +23,14 @@ Building on SQLite means a broken migration passes CI and fails in production.
 The development machine runs XAMPP, which ships **MariaDB 10.4.32** rather than MySQL. A capability
 probe was run against it:
 
-| Requirement | MariaDB 10.4.32 | MySQL 8.4.10 |
-|---|---|---|
-| `CHECK` constraints enforced | ✅ | ✅ |
-| Generated columns + index | ✅ | ✅ |
-| Window functions | ✅ | ✅ |
-| InnoDB `FULLTEXT` | ✅ | ✅ |
-| `utf8mb4_0900_ai_ci` collation | ❌ absent | ✅ |
-| `FOR UPDATE SKIP LOCKED` | ❌ (MariaDB 10.6+) | ✅ |
+| Requirement                    | MariaDB 10.4.32    | MySQL 8.4.10 |
+| ------------------------------ | ------------------ | ------------ |
+| `CHECK` constraints enforced   | ✅                 | ✅           |
+| Generated columns + index      | ✅                 | ✅           |
+| Window functions               | ✅                 | ✅           |
+| InnoDB `FULLTEXT`              | ✅                 | ✅           |
+| `utf8mb4_0900_ai_ci` collation | ❌ absent          | ✅           |
+| `FOR UPDATE SKIP LOCKED`       | ❌ (MariaDB 10.6+) | ✅           |
 
 MariaDB 10.4 also reached **end of life in June 2024** and receives no security updates.
 

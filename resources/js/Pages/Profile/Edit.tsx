@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { PageProps } from '@/types';
+import { type PageProps } from '@/types';
 import { Head } from '@inertiajs/react';
 import DeleteUserForm from './Partials/DeleteUserForm';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
@@ -12,7 +12,7 @@ export default function Edit({
     return (
         <AuthenticatedLayout
             header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+                <h2 className="text-xl leading-tight font-semibold text-gray-800 dark:text-gray-200">
                     Profile
                 </h2>
             }
