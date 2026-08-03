@@ -765,8 +765,29 @@ T-M0-001 → T-M1-002 → T-M2-002 → T-M3-001 → T-M4-011 → T-M4-016
 
 ## Next action
 
-**Start with `T-M0-001` — switch the database connection to MySQL 8.**
+_Last updated: 2026-08-04 — M0 is 14/15 complete._
 
-Per the working agreement: I will explain what and why, implement, test, fix, mark it `[x]`, leave it commit-ready, then stop for approval.
+**Resume at `T-M0-014` — repo hygiene:** `CONTRIBUTING.md` (conventional commits), PR template, `.editorconfig` review, and extracting ADR-0001…0014 from PROJECT_PLAN §3 into `docs/adr/` (only `0009-mysql-8-everywhere.md` exists so far). That closes M0, after which **M1 opens with `T-M1-001`, the brand proposal — three palette and type-pairing directions that need your pick before the design system can be built.**
+
+### State of the toolchain
+
+Every gate below is green and runs in CI on push and pull request:
+
+| Gate              | Command                                           |
+| ----------------- | ------------------------------------------------- |
+| Environment       | `php artisan craftique:doctor`                    |
+| Formatting        | `vendor/bin/pint --test` · `npm run format:check` |
+| Static analysis   | `composer analyse` (PHPStan level 6)              |
+| Refactoring drift | `vendor/bin/rector process --dry-run`             |
+| Types             | `npm run types`                                   |
+| Lint              | `npm run lint`                                    |
+| Tests             | `composer test` — 111 passing, 459 assertions     |
+| Build             | `npm run build` — client + SSR                    |
+
+**Before running anything**, start the two servers — neither is a Windows service: `scripts\mysql8.bat start` and `scripts\redis.bat start`. See [environment.md](runbooks/environment.md).
+
+**Still outstanding, and not an engineering call:** Risk R1, the payment-aggregation licensing question, must be answered before `T-M7-001`.
+
+Per the working agreement: explain what and why, implement, test, fix, mark `[x]`, leave commit-ready, then stop for approval.
 
 _End of TASKS.md_
