@@ -1,3 +1,0 @@
-# Architecture tests live here (T-M0-011).
-# Pest's arch() assertions enforce the module boundaries from ADR-0014 and the
-# conventions in PROJECT_PLAN §8.4.
