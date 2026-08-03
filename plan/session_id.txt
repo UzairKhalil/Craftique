@@ -1,3 +1,6 @@
 7416bb2a-d223-462f-a360-222ac0b59c93
 
 claude --resume 7416bb2a-d223-462f-a360-222ac0b59c93
+
+test@craftique.test	password
+second@craftique.test	password

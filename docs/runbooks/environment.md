@@ -195,6 +195,40 @@ failure once nothing depends on it.
 Credentials for local development are `root` with **no password**, matching the XAMPP convention.
 The instance binds to `127.0.0.1` only and is never reachable off the machine.
 
+## Browsing the database
+
+XAMPP's phpMyAdmin defaults to MariaDB on 3306, which is **not** Craftique's
+database. It is configured with a second server entry so both are reachable:
+
+<http://localhost/phpmyadmin/index.php?server=2>
+
+Or open <http://localhost/phpmyadmin/> and pick **Craftique (MySQL 8.4 - port 3307)** from the server dropdown on the home page. Server 1 remains XAMPP's
+MariaDB, untouched.
+
+That entry lives in `C:\xampp\phpMyAdmin\config.inc.php` (outside this
+repository, so it is not version-controlled). A timestamped backup of the
+original sits beside it. If it is ever lost, re-add:
+
+```php
+$i++;
+$cfg['Servers'][$i]['verbose'] = 'Craftique (MySQL 8.4 - port 3307)';
+$cfg['Servers'][$i]['auth_type'] = 'config';
+$cfg['Servers'][$i]['user'] = 'root';
+$cfg['Servers'][$i]['password'] = '';
+$cfg['Servers'][$i]['extension'] = 'mysqli';
+$cfg['Servers'][$i]['AllowNoPassword'] = true;
+$cfg['Servers'][$i]['host'] = '127.0.0.1';
+$cfg['Servers'][$i]['port'] = 3307;
+$cfg['Servers'][$i]['connect_type'] = 'tcp';
+```
+
+Do not repoint server 1 at 3307 — that would hide the MariaDB databases other
+projects on this machine use.
+
+Alternatives: `scripts\mysql8.bat cli` for a terminal client, or any desktop
+tool (TablePlus, HeidiSQL, DBeaver, MySQL Workbench) pointed at
+`127.0.0.1:3307`, user `root`, empty password.
+
 ## First-time setup on a new machine
 
 ```bash
