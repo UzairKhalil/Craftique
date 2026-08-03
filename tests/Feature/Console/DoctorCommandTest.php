@@ -95,6 +95,36 @@ final class DoctorCommandTest extends TestCase
         $this->assertGreaterThan(0, $output['failures']);
     }
 
+    /**
+     * Redis is only load-bearing when something is pointed at it. When it is,
+     * an unreachable server must fail the gate — a warning would let CI go
+     * green on a machine where the queue silently does nothing.
+     */
+    public function test_unreachable_redis_fails_only_when_a_driver_depends_on_it(): void
+    {
+        config()->set('database.redis.default.port', 59998);
+
+        // Nothing points at Redis: a warning is the correct, non-blocking answer.
+        config()->set(['cache.default' => 'array', 'queue.default' => 'sync', 'session.driver' => 'array', 'broadcasting.default' => 'log']);
+        $this->assertSame('WARN', $this->redisStatus());
+
+        // Now the cache depends on it, so the same outage must be fatal.
+        config()->set('cache.default', 'redis');
+        $this->assertSame('FAIL', $this->redisStatus());
+    }
+
+    private function redisStatus(): string
+    {
+        $checks = array_values(array_filter(
+            $this->runJson(false)['checks'],
+            static fn (array $check): bool => $check['check'] === 'redis server',
+        ));
+
+        $this->assertNotEmpty($checks, 'The doctor never checked the Redis server.');
+
+        return $checks[0]['status'];
+    }
+
     public function test_json_output_is_machine_readable(): void
     {
         $output = $this->runJson();
@@ -118,13 +148,17 @@ final class DoctorCommandTest extends TestCase
     /**
      * @return array{ok: bool, failures: int, warnings: int, checks: list<array{group: string, check: string, status: string, detail: string}>}
      */
-    private function runJson(): array
+    private function runJson(bool $assertHealthy = true): array
     {
         Artisan::call('craftique:doctor', ['--json' => true]);
 
         $decoded = json_decode(Artisan::output(), true, 512, JSON_THROW_ON_ERROR);
 
         $this->assertIsArray($decoded);
+
+        if ($assertHealthy) {
+            $this->assertSame(0, $decoded['failures'], 'Environment is not healthy; run php artisan craftique:doctor');
+        }
 
         /** @var array{ok: bool, failures: int, warnings: int, checks: list<array{group: string, check: string, status: string, detail: string}>} $decoded */
         return $decoded;

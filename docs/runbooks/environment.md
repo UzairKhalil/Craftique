@@ -10,7 +10,7 @@ SQLite and MariaDB are unsupported.
 | **MySQL 8.4.10** (Craftique) | **3307** | `C:\mysql8` | ZIP install, no Windows service, no admin rights |
 | MariaDB 10.4 (XAMPP) | 3306 | `C:\xampp\mysql` | **Not used by Craftique.** Left running for other projects on this machine |
 | Apache / PHP 8.2 (XAMPP) | 80 | `C:\xampp` | Or use `php artisan serve` on 8000 |
-| Redis | 6379 | — | Cache, session, queue, locks (T-M0-003) |
+| **Redis 5.0.14** | **6379** | `C:\redis` | Cache, session, queue, locks, broadcasting |
 
 MySQL 8's X protocol is disabled (`mysqlx = OFF`) so nothing contends on 33060.
 
@@ -77,8 +77,11 @@ Expected warnings on this machine until the relevant task lands:
 | Warning | Resolved by |
 |---|---|
 | `version 8.2.12 — 8.3+ recommended` | ADR-0010, optional |
-| `redis server unreachable` | T-M0-003 (Redis server install) |
 | `opcache not loaded` | Production concern only; CLI does not load it |
+
+Redis is reported as a **failure** when `CACHE_STORE`, `QUEUE_CONNECTION`, `SESSION_DRIVER` or
+`BROADCAST_CONNECTION` points at it, and only as a warning otherwise — so a machine that silently
+processes no jobs cannot pass CI.
 
 ## Starting and stopping MySQL 8
 
@@ -110,6 +113,77 @@ net start craftique-mysql8
 ```
 
 To undo: `net stop craftique-mysql8` then `mysqld.exe --remove craftique-mysql8`.
+
+## Redis
+
+Redis backs cache, session, queue, locks and broadcasting:
+
+```env
+CACHE_STORE=redis
+SESSION_DRIVER=redis
+QUEUE_CONNECTION=redis
+BROADCAST_CONNECTION=redis
+```
+
+```bash
+scripts/redis.sh start | stop | status | cli
+```
+
+```bat
+scripts\redis.bat start
+```
+
+Config: `C:\redis\craftique.conf` · log: `C:\redis\redis.log` · data: `C:\redis\data`
+
+Laravel separates concerns across Redis databases, which is worth knowing when inspecting keys by
+hand — **queue jobs live in db 0, cache entries in db 1**:
+
+```bash
+C:/redis/redis-cli.exe -n 0 keys '*queues*'   # pending jobs
+C:/redis/redis-cli.exe -n 1 keys '*'          # cache entries
+```
+
+### Which Redis, and why
+
+Redis has no official Windows build. This is the community
+[tporadowski](https://github.com/tporadowski/redis) port, 5.0.14 — a portable ZIP needing no
+administrator rights, matching how MySQL 8 is installed here. Everything Laravel asks of Redis
+(strings, hashes, lists, sorted sets, Lua `EVAL` for atomic locks, pub/sub) behaves identically on
+5.x and 7.x, so **local 5.0 against production 7.x is not a meaningful divergence** — unlike the
+MariaDB/MySQL split, where SQL semantics genuinely differ.
+
+If you later want Redis 7 parity or a proper auto-starting Windows service, install
+[Memurai](https://www.memurai.com/) (Developer Edition is free, Redis 7.2-compatible) and stop using
+these scripts. It needs an elevated installer. Production runs real Redis on Linux either way.
+
+### Verifying the full queue path end to end
+
+`PING` only proves the server answers. To prove dispatch → Redis → worker → execution:
+
+```bash
+php artisan tinker --execute="dispatch(new App\Jobs\VerifyQueueRoundTrip('abc'));"
+php artisan queue:work --stop-when-empty
+php artisan tinker --execute="echo Cache::get('doctor:queue-round-trip:abc');"   # prints: abc
+```
+
+`php artisan craftique:doctor` performs the cache half of this automatically on every run.
+
+### Falling back to the database driver
+
+If Redis is unavailable and you need to keep working, every driver has a database-backed fallback.
+The `cache`, `sessions`, `jobs`, `job_batches` and `failed_jobs` tables already exist:
+
+```env
+CACHE_STORE=database
+SESSION_DRIVER=database
+QUEUE_CONNECTION=database
+BROADCAST_CONNECTION=log
+```
+
+Then `php artisan config:clear`. This is a **temporary local workaround, not a supported
+configuration** — it is markedly slower, gives up atomic locks, and MySQL-backed queues behave
+differently under concurrent workers. The doctor will report Redis as a warning rather than a
+failure once nothing depends on it.
 
 ## Databases
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Throwable;
@@ -80,6 +81,11 @@ final class DoctorCommand extends Command
 
     public function handle(): int
     {
+        // The console kernel reuses command instances, so a second invocation
+        // in the same process would otherwise append to the previous run's
+        // results and report every check twice.
+        $this->results = [];
+
         $this->checkPhp();
         $this->checkExtensions();
         $this->checkDatabase();
@@ -206,13 +212,76 @@ final class DoctorCommand extends Command
             return; // Already reported as a failed required extension.
         }
 
+        $drivers = [
+            'cache' => (string) config('cache.default'),
+            'queue' => (string) config('queue.default'),
+            'session' => (string) config('session.driver'),
+            'broadcast' => (string) config('broadcasting.default'),
+        ];
+
+        $this->record(
+            'Cache & Queue',
+            'drivers',
+            self::STATUS_PASS,
+            implode('  ', array_map(static fn (string $k, string $v): string => "{$k}={$v}", array_keys($drivers), $drivers)),
+        );
+
+        // Redis is only load-bearing if something is actually pointed at it.
+        // When it is, an unreachable server is a hard failure rather than a
+        // polite warning — otherwise CI would go green on a broken machine.
+        $redisIsRequired = in_array('redis', $drivers, true);
+
         try {
             Redis::connection()->ping();
-            $this->record('Cache & Queue', 'redis server', self::STATUS_PASS, (string) config('database.redis.default.host').':'.config('database.redis.default.port'));
+            $this->record(
+                'Cache & Queue',
+                'redis server',
+                self::STATUS_PASS,
+                (string) config('database.redis.default.host').':'.config('database.redis.default.port'),
+            );
         } catch (Throwable $e) {
-            // Not fatal: the database driver is a documented fallback (T-M0-003).
-            $this->record('Cache & Queue', 'redis server', self::STATUS_WARN, 'unreachable — '.$this->firstLine($e->getMessage()));
+            $this->record(
+                'Cache & Queue',
+                'redis server',
+                $redisIsRequired ? self::STATUS_FAIL : self::STATUS_WARN,
+                'unreachable — '.$this->firstLine($e->getMessage())
+                    .($redisIsRequired ? ' (required: '.implode(', ', array_keys($drivers, 'redis', true)).')' : ''),
+            );
+
+            return;
         }
+
+        $this->checkCacheRoundTrip();
+    }
+
+    /**
+     * Pinging Redis proves the server answers. It does not prove the configured
+     * cache store works — wrong prefix, wrong database, serialization problems
+     * all survive a PING. So write, read back, and clean up.
+     */
+    private function checkCacheRoundTrip(): void
+    {
+        $key = 'doctor:round-trip:'.bin2hex(random_bytes(4));
+        $expected = 'ok-'.$key;
+
+        try {
+            Cache::put($key, $expected, 60);
+            $actual = Cache::get($key);
+            Cache::forget($key);
+        } catch (Throwable $e) {
+            $this->record('Cache & Queue', 'cache round-trip', self::STATUS_FAIL, $this->firstLine($e->getMessage()));
+
+            return;
+        }
+
+        $this->record(
+            'Cache & Queue',
+            'cache round-trip',
+            $actual === $expected ? self::STATUS_PASS : self::STATUS_FAIL,
+            $actual === $expected
+                ? 'write, read and forget via '.class_basename(Cache::store()->getStore())
+                : 'value did not survive the round trip',
+        );
     }
 
     private function checkFilesystem(): void
